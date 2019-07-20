@@ -139,19 +139,13 @@ namespace maqueen {
         pins.digitalWritePin(DigitalPin.P1, 1);
         control.waitMicros(10);
         pins.digitalWritePin(DigitalPin.P1, 0);
-        pins.setPull(DigitalPin.P2, PinPullMode.PullUp);
-
-
 
         // read pulse
-        let d = pins.pulseIn(DigitalPin.P2, PulseValue.High, maxCmDistance * 42);
-        console.log("Distance: " + d / 42);
-
-        basic.pause(50)
+        let d = pins.pulseIn(DigitalPin.P2, PulseValue.High, maxCmDistance * 58);
 
         switch (unit) {
-            case PingUnit.Centimeters: return d / 42;
-            default: return d;
+            case PingUnit.Centimeters: return d / 58;
+            default: return d ;
         }
     }
 
@@ -168,7 +162,15 @@ namespace maqueen {
         if (index == 1) {
             buf[0] = 0x02;
         }
-        buf[1] = direction;
+        
+        if( speed >= 2000 ){
+          buf[1] = 0x0;
+        }else{
+          buf[1] = 0x1;
+        }
+        
+        speed = speed >= 2000 ? speed-2000 : speed-1000;
+       // buf[1] = direction;
         buf[2] = speed;
         pins.i2cWriteBuffer(0x10, buf);
     }
@@ -216,9 +218,7 @@ namespace maqueen {
 
     //% weight=20
     //% blockId=writeLED block="led|%led|ledswitch|%ledswitch"
-    //% led.fieldEditor="gridpicker" led.fieldOptions.columns=2 
-    //% ledswitch.fieldEditor="gridpicker" ledswitch.fieldOptions.columns=2
-    export function writeLED(led: LED, ledswitch: LEDswitch): void {
+    export function writeLED(led: number, ledswitch: number): void {
         if (led == LED.LEDLeft) {
             pins.digitalWritePin(DigitalPin.P8, ledswitch)
         } else if (led == LED.LEDRight) {
